@@ -3,23 +3,11 @@ package com.xiaofeidev.delegatedemo.demo
 import kotlin.properties.Delegates
 
 class Example {
-    //属性委托
+    //委托属性
     var p: String? by Delegate()
 }
-
-class User {
-    var name: String by Delegates.observable("<no name>") {
-            prop, old, new ->
-        println("$old -> $new")
-    }
-}
-
-class Student(val map: Map<String, Any?>) {
-    val name: String by map
-    val age: Int     by map
-}
-
-//委托类
+/////////////////////////////////////////////////////////////////////////////
+//委托类，墨水能用来打印文字(￣▽￣)"
 class Ink {
     fun print() {
         print("This message comes from the delegate class,Not Printer.")
@@ -35,11 +23,26 @@ class Printer {
         ink.print()//调用委托对象的方法
     }
 }
+/////////////////////////////////////////////////////////////////////////////
+class User {
+    var name: String by Delegates.observable("<no name>") {
+            prop, old, new ->
+        println("$old -> $new")
+    }
+}
+/////////////////////////////////////////////////////////////////////////////
+class Student(val map: Map<String, Any?>) {
+    val name: String by map
+    val age: Int     by map
+}
 
 fun main(args: Array<String>) {
     val e = Example()
     e.p = "hehe"
     println(e.p)
+//
+    val printer = Printer()
+    printer.print()
 //
     //延迟计算属性的值，lambda 表达式中的逻辑只会执行一次并记录结果，后续调用 get() 只是返回记录的结果
     val lazyValue: String by lazy {
@@ -60,8 +63,5 @@ fun main(args: Array<String>) {
 
     println(student.name)
     println(student.age)
-//
-    val printer = Printer()
-    printer.print()
 }
 
