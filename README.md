@@ -1,5 +1,4 @@
-# KotlinDelegation
-Kotlin 在语言层面支持的委托模式在 Android 开发中的应用
+# Kotlin 在语言层面支持的委托模式在 Android 开发中的应用
 
 **委托模式**被证明是一种很好的替代**继承**的方式，Kotlin 在语言层面对委托模式提供了非常优雅的支持（语法糖）。
 
