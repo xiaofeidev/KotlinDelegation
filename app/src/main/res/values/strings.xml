@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">DelegateDemo</string>
+    <string name="main_desc">下面 EditText 中的内容初始化自 SP(SharedPreferences) 中存储的内容，
+        你往里面输入新的内容点击保存按钮后就会把新的内容存在 SP 中，退出再打开应用读取到的会是新的内容。</string>
+    <string name="main_save">保存至 SharedPreferences</string>
+    <string name="main_save_success">保存 SP 成功</string>
+</resources>
