@@ -3,7 +3,7 @@ Kotlin 在语言层面支持的委托模式在 Android 开发中的应用
 
 **委托模式**被证明是一种很好的替代**继承**的方式，Kotlin 在语言层面对委托模式提供了非常优雅的支持（语法糖）。
 
-先给大家看看我用 Kotlin 的属性委托语法糖在 Android 工程里面做的一件有用工作——`SharedPreferences` 的读写委托。
+先给大家看看我用 Kotlin 的属性委托**语法糖**在 Android 工程里面做的一件有用工作——`SharedPreferences` 的读写委托。
 
 ~~文中陈列的所有代码已汇总成 Demo 传至 github，[点这儿获取源码](https://github.com/xiaofei-dev/KotlinDelegation)。~~
 
@@ -26,7 +26,7 @@ Kotlin 在语言层面支持的委托模式在 Android 开发中的应用
 
 先来看看 delegates 包下的文件。
 
-`SPUtils` 是个读写 `SharedPreferences`(以下简称 SP) 项的基础工具类：
+`SPUtils` 是个读写 `SharedPreferences`(以下简称 SP) 存储项的基础工具类：
 
 ```kotlin
 /**
@@ -67,7 +67,7 @@ object SPUtils {
 }
 ```
 
-代码主要使用泛型实现的 SP 读写，整体还是非常简洁易懂的。上下文对象使用了自定义的 `Application` 类实例。
+上面主要使用泛型实现了友好的 SP 读写，整体还是非常简洁易懂的。上下文对象使用了自定义的 `Application` 类实例（见 Demo 中的 App 类）。
 
 ## Kotlin 中的委托属性
 
@@ -80,7 +80,7 @@ object SPUtils {
  * 读 SP 的操作委托给该类对象的 getValue 方法，
  * 写 SP 操作委托给该类对象的 setValue 方法，
  * 注意这两个方法不用你显式调用，把一切交给编译器就行（还是语法糖）
- * 具体定义 SP 存储项的代码请参考 SpBase 文件</p>
+ * 具体使用此类定义 SP 存储项的代码请参考 SpBase 文件</p>
  */
 
 class SPDelegates<T>(private val key: String, private val default: T) : ReadWriteProperty<Any?, T> {
@@ -93,16 +93,16 @@ class SPDelegates<T>(private val key: String, private val default: T) : ReadWrit
 }
 ```
 
-`SPDelegates` 类实现了 Kotlin 标准库中声明的用于属性委托的 `ReadWriteProperty` 接口（这个类具体咋用后面会详细说到），从名字可以看出此接口是可读写的(适用于 `var` 声明的属性)，除此之外还有个 `ReadOnlyProperty` 接口(适用于 `val` 声明的属性)。
+`SPDelegates` 类实现了 Kotlin 标准库中声明的用于属性委托的 `ReadWriteProperty` 接口（`SPDelegates` 类的用法后面会详细说到），从名字可以看出此接口是可读写的(适用于 `var` 声明的属性)，除此之外还有个 `ReadOnlyProperty` （只读）接口(适用于 `val` 声明的属性)。
 
-对于属性的委托类（以`SPDelegates`类为例），要求必须提供一个 `getValue()` 函数（和一个`setValue()`函数——对于 **var** 属性）。其`getValue` 方法的参数要求如下：
+对于属性的委托类（以`SPDelegates`为例），要求必须提供一个 `getValue()` 函数（和一个`setValue()`函数——对于 **var** 属性）。其`getValue` 方法的参数要求如下：
 
-- `thisRef` —— 必须与 **属性所属类** 的类型（对于扩展属性——指被扩展的类型）相同或是它的超类型(后面会说到)；
+- `thisRef` —— 必须与 **属性所属类** 的类型（对于扩展属性——指被扩展的类型）相同或是它的超类型(后面会解释这句话)；
 - `property` —— 必须是类型 `KProperty<*>` 或其超类型。
 
-对于其 `setValue` 方法，前两个参数同 `getValue`。第三个`value` 参数必须与属性同类型或是它的子类型。
+对于其 `setValue` 方法，前两个参数同 `getValue`。第三个参数`value` 必须与属性同类型或是它的子类型。
 
-以上概念暂时看不懂不要紧，下面通过委托属性的具体应用来帮助理解。
+以上概念暂时看不懂不要紧，下面通过委托属性的具体应用来加深理解。
 
 接着是具体使用到委托属性的 `SpBase` 单例类：
 
@@ -117,19 +117,19 @@ object SpBase{
 
 
     // 这就定义了一个 SP 存储项
-    // 把 SP 的读写操作委托给 SPDelegates 类的一个实例（使用 by 关键字，by 属于 Kotlin 的一个原语），
-    // 此时访问 isBase (你可以简单把其看成 Java 里的一个静态变量)变量即是读取 SP 的操作，
-    // 给 isBase 变量赋值即是写 SP 的操作，就是这么简单
-    // 这里的 SPDelegates 对象 getValue 方法的 thisRef 参数的类型正是外层的 SpBase
+    // 把 SP 的读写操作委托给 SPDelegates 类的一个实例（使用 by 关键字，by 是 Kotlin 语言层面的一个原语），
+    // 此时访问 SpBase 的 contentSomething (你可以简单把其看成 Java 里的一个静态变量)属性即是在读取 SP 的存储项，
+    // 给 contentSomething 属性赋值即是写 SP 的操作，就这么简单
+    // 这里用到的 SPDelegates 对象的 getValue 方法的 thisRef（见上文） 参数的类型正是外层的 SpBase
     var contentSomething: String by SPDelegates(CONTENT_SOMETHING, "我是一个 SP 存储项，点击编辑我")
 }
 ```
 
-上面代码中，单例 `SpBase` 的属性 `contentSomething` 就是一个定义好的 SP 存储项。得益于语言级别的强大语法糖支持，写出来的代码可以如此简洁而优雅。读写 SP 存储项的请求通过属性委托给了一个 `SPDelegates` 对象，语法为
+上面代码中，单例 `SpBase` 的属性 `contentSomething` 就是一个定义好的 SP 存储项。得益于语言级别的强大语法糖支持，写出来的代码可以如此简洁而优雅。读写 SP 存储项的请求通过属性委托给了一个 `SPDelegates` 对象，委托属性的语法为
 
  `val/var <属性名>: <类型> by <表达式>`
 
-其最后会被编译器解释成这样的代码(大致上)：
+其最后会被编译器解释成下面这样的代码(大致上)：
 
 ```kotlin
 object SpBase{
@@ -137,12 +137,12 @@ object SpBase{
     
     private val propDelegate = SPDelegates(CONTENT_SOMETHING, "我是一个 SP 存储项，点击编辑我")
     var contentSomething: String
-        get() = propDelegate.getValue(this, this::contentSomething)
-        set(value) = propDelegate.setValue(this, this::contentSomething, value)
+        get() = propDelegate.getValue(this, this::contentSomething)//读SP
+        set(value) = propDelegate.setValue(this, this::contentSomething, value)//写SP
 }
 ```
 
-还是比较容易理解的。下面给演示这个定义好的 SP 存储项如何使用，见 Demo 的 MainActivity 类文件：
+还是比较容易理解的。下面演示下这个定义好的 SP 存储项如何使用，见 Demo 的 MainActivity 类文件：
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
@@ -165,11 +165,11 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
-整体比较简单，就是个读写 SP 存储项的过程。大家可以实际运行下 Demo 看看具体效果。
+整体比较简单，就是个读写 SP 存储项的过程。大家可以实际运行下 Demo 看下具体效果。
 
 ## 从零实现一个属性的委托类
 
-上文述及的 `SPDelegates` 类实现了 Kotlin 标准库提供的 `ReadWriteProperty` 接口，我们当然也可以不借助任何接口来实现一个属性委托类，只要其提供一个`getValue()` 函数（和一个`setValue()`函数——对于 **var** 属性）并且符合我们上面讨论的参数要求就行。下面来单独定义一个平凡的属性委托类 `Delegate` （见 Demo 的 demo 包）：
+上文述及的 `SPDelegates` 类实现了 Kotlin 标准库提供的 `ReadWriteProperty` 接口，我们当然也可以不借助任何接口来实现一个属性委托类，只要其提供一个`getValue()` 函数（和一个`setValue()`函数——对于 **var** 属性）并且符合我们上面讨论的参数要求就行。下面来定义一个平凡的属性委托类 `Delegate` （见 Demo 的 demo 包下 Example 文件）：
 
 ```kotlin
 /**
@@ -196,7 +196,7 @@ class Delegate<T> {
 
 ```kotlin
 class Example {
-    //属性委托
+    //委托属性
     var p: String? by Delegate()
 }
 
@@ -221,10 +221,12 @@ hehe
 
 有必要单独花篇幅解释下何为**委托模式**。
 
-简而言之，在委托模式中，有两个对象共同处理同一个请求，接受请求的对象将请求委托给另一个对象来处理：
+简而言之，在委托模式中，有两个对象共同处理同一个请求，接受请求的对象将请求委托给另一个对象来处理。
+
+委托模式最简单的例子：
 
 ```kotlin
-//委托类
+//委托类，墨水能用来打印文字(￣▽￣)"
 class Ink {
     fun print() {
         print("This message comes from the delegate class,Not Printer.")
@@ -257,7 +259,7 @@ This message comes from the delegate class,Not Printer.
 
 ## Kotlin 的委托模式
 
-Kotlin 可以做到零样板代码实现委托模式（而不是像上节展示的实现方式）！
+Kotlin 可以做到零样板代码实现委托模式（而不是像上面展示的那样还需要样板代码）！
 
 比如我们现在有如下接口和类：
 
@@ -271,15 +273,15 @@ class BaseImpl(val x: Int) : Base {
 }
 ```
 
-`Base` 接口想做的就是在控制台打印些什么东西。这没啥问题，我们已经在 `BaseImpl` 类里完整实现了 `Base` 接口。
+`Base` 接口想做的就是在控制台打印些什么东西。这没啥问题，我们已经在 `BaseImpl` 类上完整实现了 `Base` 接口。
 
-此时我们想再给 Base 接口写一个实现可以这么做：
+此时我们想再给 Base 接口写一个实现时可以这么做：
 
 ```kotlin
 class Derived(b: Base) : Base by b
 ```
 
-这其实跟下面的写法是等价的：
+这其实跟下面的写法是等价的（编译器实际生成的）：
 
 ```kotlin
 class Derived(val delegate: Base) : Base {
@@ -289,7 +291,17 @@ class Derived(val delegate: Base) : Base {
 }
 ```
 
-只不过 Kotlin 通过编译器的黑魔法将许多模板代码封印在了 `by` 这样一个语言级别的原语中（又是语法糖）。使用：
+注意不是下面这种：
+
+```kotlin
+class Derived(val delegate: Base){
+    fun print() {
+        delegate.print()
+    }
+}
+```
+
+Kotlin 通过编译器的黑魔法将许多样板代码封印在了 `by` 这样一个语言级别的原语中（又是语法糖）。使用方式：
 
 ```kotlin
 fun main(args: Array<String>) {
@@ -308,13 +320,13 @@ fun main(args: Array<String>) {
 
 ## Kotlin 标准库中其他属性委托
 
-说会属性委托，Kotlin 的标准库为一些有用的委托写好了工厂方法，下面一一列举。
+说回属性委托，Kotlin 的标准库为一些常用的委托写好了工厂方法，下面一一列举。
 
 ### 延迟属性 Lazy
 
 ```kotlin
 fun main(args: Array<String>) {
-    //延迟计算属性的值，lambda 表达式中的逻辑只会执行一次(且是线程安全的)并记录结果，后续调用 get() 只是返回记录的结果
+    //延迟计算属性的值，lazy 后面 lambda 表达式中的逻辑只会执行一次(且是线程安全的)并记录结果，后续调用属性的 get() 方法只是返回记录的结果
     val lazyValue: String by lazy {
         println("computed!")
         "Hello"
@@ -334,7 +346,7 @@ Hello
 
 ### 可观察属性 Observable
 
-`Delegates.observable()`接受两个参数：初始值与修改时处理程序。 每次给属性赋值时就会调用该处理程序（在赋值*后*执行）。其有三个参数：被赋值属性的 `KProperty` 对象、旧值与新值：
+`Delegates.observable()`接受两个参数：初始值与修改时处理程序。 每次给属性赋值时就会调用该处理程序（在赋值**后**执行）。处理程序有三个参数：被赋值属性的 `KProperty` 对象、旧值与新值：
 
 ```kotlin
 class User {
@@ -379,10 +391,10 @@ fun main(args: Array<String>) {
 }
 ```
 
-当然这种应用必须确保属性的名字和 `map`中的键值对应起来，不然你可能会收获一个 `NoSuchElementException` 运行时异常：
+当然这种应用必须确保属性的名字和 `map`中的键对应起来，不然你可能会收获一个 `NoSuchElementException` 运行时异常，大概像这样：
 
 ```html
-java.util.NoSuchElementException: Key age1 is missing in the map.
+java.util.NoSuchElementException: Key XXXX is missing in the map.
 ```
 
 言止于此，未完待续。
