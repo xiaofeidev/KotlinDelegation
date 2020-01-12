@@ -405,5 +405,5 @@ java.util.NoSuchElementException: Key XXXX is missing in the map.
 3. 《Kotlin 极简教程》
 4. 《Kotlin 核心编程》
 5. 维基百科 [委托模式](https://zh.wikipedia.org/wiki/委托模式) 词条
-6. [Kotlin 官方文档](https://www.kotlincn.net/docs/reference/delegation.html)
+6. [Kotlin 官方文档](https://kotlinlang.org/docs/reference/delegated-properties.html)
 
