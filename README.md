@@ -1,10 +1,12 @@
 # Kotlin 在语言层面支持的委托模式在 Android 开发中的应用
 
+# Kotlin 委托模式用于 Android 开发
+
 **委托模式**被证明是一种很好的替代**继承**的方式，Kotlin 在语言层面对委托模式提供了非常优雅的支持（语法糖）。
 
 先给大家看看我用 Kotlin 的属性委托**语法糖**在 Android 工程里面做的一件有用工作——`SharedPreferences` 的读写委托。
 
-~~文中陈列的所有代码已汇总成 Demo 传至 github，[点这儿获取源码](https://github.com/xiaofei-dev/KotlinDelegation)。~~
+~~文中陈列的所有代码已汇总成 Demo 传至 github，[点这儿获取源码](https://github.com/xiaofei-dev/KotlinDelegation)。建议配合 Demo 阅读本文。~~
 
 项目主要文件结构如下：
 
@@ -96,7 +98,7 @@ class SPDelegates<T>(private val key: String, private val default: T) : ReadWrit
 
 对于属性的委托类（以`SPDelegates`为例），要求必须提供一个 `getValue()` 函数（和一个`setValue()`函数——对于 **var** 属性）。其`getValue` 方法的参数要求如下：
 
-- `thisRef` —— 必须与 **属性所属类** 的类型（对于扩展属性——指被扩展的类型）相同或是它的超类型(后面会解释这句话)；
+- `thisRef` —— 必须与 **属性所属类** 的类型（对于扩展属性——指被扩展的类型）相同或是它的超类型(参见后面 SpBase 单例类中的注释)；
 - `property` —— 必须是类型 `KProperty<*>` 或其超类型。
 
 对于其 `setValue` 方法，前两个参数同 `getValue`。第三个参数`value` 必须与属性同类型或是它的子类型。
