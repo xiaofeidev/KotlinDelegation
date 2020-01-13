@@ -68,7 +68,7 @@ object SPUtils {
 }
 ```
 
-上面主要使用泛型实现了友好的 SP 读写，整体还是非常简洁易懂的。上下文对象使用了自定义的 `Application` 类实例（见 Demo 中的 App 类）。
+主要使用泛型实现了完善的 SP 读写，整体还是非常简洁易懂的。上下文对象使用了自定义的 `Application` 类实例（见 Demo 中的 App 类）。
 
 ## Kotlin 中的委托属性
 
