@@ -99,7 +99,7 @@ class SPDelegates<T>(private val key: String, private val default: T) : ReadWrit
 对于属性的委托类（以`SPDelegates`为例），要求必须提供一个 `getValue()` 函数（和一个`setValue()`函数——对于 **var** 属性）。其`getValue` 方法的参数要求如下：
 
 - `thisRef` —— 必须与 **属性所属类** 的类型（对于扩展属性——指被扩展的类型）相同或是它的超类型(参见后面 SpBase 单例类中的注释)；
-- `property` —— 必须是类型 `KProperty<*>` 或其超类型。
+- `property` —— 必须是类型 `KProperty<*>` （Kotlin 标准库 kotlin.reflect (反射)包下的一个类）或其超类型。
 
 对于其 `setValue` 方法，前两个参数同 `getValue`。第三个参数`value` 必须与属性同类型或是它的子类型。
 
