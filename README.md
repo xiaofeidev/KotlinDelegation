@@ -400,7 +400,7 @@ java.util.NoSuchElementException: Key XXXX is missing in the map.
 
 言止于此，未完待续。
 
-## 参考文献
+## 参考资料
 
 1. 《设计模式：可复用面向对象软件的基础》
 2. 《Kotlin for Android Developers》
